@@ -1,0 +1,81 @@
+
+// تزریق داده‌ها به جدول
+    const tbody = document.getElementById("dataTable");
+    tbody.innerHTML = brands.map(b => 
+      <tr class="hover:bg-white/5 transition-colors">
+        <td class="py-4 px-6 font-bold flex items-center gap-3">
+          <span class="w-2.5 h-2.5 rounded-full" style="background:${b.color}; box-shadow: 0 0 8px ${b.color}"></span>
+          ${b.name}
+        </td>
+        <td class="py-4 px-6 text-center font-mono text-emerald-400">${b.q.toFixed(2)}</td>
+        <td class="py-4 px-6 text-center font-mono text-sky-400">$${b.p.toLocaleString()}</td>
+        <td class="py-4 px-6 text-center font-mono text-fuchsia-400">${b.l}/10</td>
+        <td class="py-4 px-6 text-slate-400 text-xs">${b.note}</td>
+      </tr>
+    ).join("");
+
+    // پیکربندی و ساختار نمودار سه بعدی Plotly.js
+    const trace = {
+      type: "scatter3d",
+      mode: "markers+text",
+      x: brands.map(b => b.q),
+      y: brands.map(b => b.p),
+      z: brands.map(b => b.l),
+      text: brands.map(b => b.name),
+      textposition: "top center",
+      hovertemplate:
+        "<b>%{text}</b><br>" +
+        "کیفیت: %{x}<br>" +
+        "قیمت: $%{y}<br>" +
+        "لوکس‌بودن: %{z}/10" +
+        "<extra></extra>",
+      marker: {
+        size: 9,
+        color: brands.map(b => b.color),
+        opacity: 0.95,
+        line: { width: 1, color: "rgba(255,255,255,0.4)" }
+      }
+    };
+
+    const layout = {
+      paper_bgcolor: "rgba(0,0,0,0)",
+      plot_bgcolor: "rgba(0,0,0,0)",
+      margin: { l: 0, r: 0, t: 10, b: 0 },
+      scene: {
+        xaxis: {
+          title: "کیفیت (از 5)",
+          range: [3.7, 4.7],
+          gridcolor: "rgba(255,255,255,0.07)",
+          zerolinecolor: "rgba(255,255,255,0.15)",
+          color: "#94a3b8"
+        },
+        yaxis: {
+          title: "قیمت ($)",
+          gridcolor: "rgba(255,255,255,0.07)",
+          zerolinecolor: "rgba(255,255,255,0.15)",
+          color: "#94a3b8"
+        },
+        zaxis: {
+          title: "لوکس‌بودن (از 10)",
+          range: [0, 11],
+          gridcolor: "rgba(255,255,255,0.07)",
+          zerolinecolor: "rgba(255,255,255,0.15)",
+          color: "#94a3b8"
+        },
+        camera: {
+          eye: { x: 1.5, y: 1.5, z: 1.1 }
+        }
+      },
+      showlegend: false,
+      font: { family: "Vazirmatn, sans-serif", color: "#e2e8f0" }
+    };
+
+    const config = {
+      responsive: true,
+      displayModeBar: false
+    };
+
+    Plotly.newPlot("chart3d", [trace], layout, config);
+  </script>
+</body>
+</html>
