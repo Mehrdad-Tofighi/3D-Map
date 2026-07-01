@@ -1,7 +1,97 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تحلیل جامع کیفیت، قیمت و لوکس‌بودن برندها</title>
 
-// تزریق داده‌ها به جدول
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Plotly.js (3D Charts) -->
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700&display=swap');
+    body { 
+      font-family: 'Vazirmatn', sans-serif; 
+      background: linear-gradient(135deg, #090d16 0%, #0f172a 100%); 
+      color: #e2e8f0; 
+    }
+    /* بک‌گراند شیشه‌ای ملایم‌تر با شفافیت بیشتر (Opacity کمتر پس‌زمینه) */
+    .glass { 
+      background: rgba(30, 41, 59, 0.45); 
+      backdrop-filter: blur(16px); 
+      border: 1px solid rgba(255, 255, 255, 0.05); 
+    }
+  </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex items-center justify-center">
+  <main class="w-full max-w-5xl space-y-8">
+    
+    <!-- هدر -->
+    <header class="text-center">
+      <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 via-sky-400 to-indigo-400 bg-clip-text text-transparent">
+        نمودار سه‌بعدی مقایسه برندها
+      </h1>
+      <p class="text-slate-400 mt-2 text-sm">
+        تحلیلی بر پایه کیفیت، قیمت و شاخص لوکس‌بودن
+      </p>
+    </header>
+
+    <!-- بخش نمودار ۳ بعدی تعاملی -->
+    <section class="glass rounded-3xl p-6 shadow-2xl">
+      <div id="chart3d" class="w-full" style="height: 520px;"></div>
+      <p class="text-xs text-slate-500 mt-2 text-left" dir="ltr">
+        * Hint: Rotate with mouse/touch, scroll to zoom, double-click to reset view.
+      </p>
+    </section>
+
+    <!-- جدول داده‌های برندها -->
+    <section class="glass rounded-3xl overflow-hidden shadow-xl">
+      <div class="px-6 py-4 border-b border-white/5 bg-white/5">
+        <h2 class="font-bold text-slate-200">جدول مشخصات و داده‌های مرجع</h2>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-right text-sm border-collapse">
+          <thead class="bg-slate-900/60 text-slate-400">
+            <tr>
+              <th class="py-3 px-6 font-semibold">برند</th>
+              <th class="py-3 px-6 font-semibold text-center">کیفیت (از 5)</th>
+              <th class="py-3 px-6 font-semibold text-center">قیمت ($)</th>
+              <th class="py-3 px-6 font-semibold text-center">لوکس‌بودن (از 10)</th>
+              <th class="py-3 px-6 font-semibold">توضیح</th>
+            </tr>
+          </thead>
+          <tbody id="dataTable" class="divide-y divide-white/5 text-slate-300">
+            <!-- داده‌ها به صورت خودکار توسط جاوااسکریپت تزریق می‌شوند -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- تحلیل نهایی ۳ خطی -->
+    <section class="glass rounded-3xl p-8 border-r-4 border-indigo-500 shadow-lg">
+      <h3 class="text-xl font-bold text-white mb-3">تحلیل نهایی برندها</h3>
+      <p class="text-slate-300 leading-8 text-justify">
+        بر اساس تحلیل فضایی سه بعد مذکور، <b>پوما</b> با حفظ عملکرد فنی و حداقل هزینه، به عنوان «قطب کارایی و ارزش خرید» شناخته می‌شود؛ در حالی که <b>نایکی و ایر جردن</b> با کیفیت ساخت عالی و موقعیت قیمتی میانی، جایگاه «استاندارد عملکرد ورزشی» را تثبیت کرده‌اند. در نقطه مقابل، <b>بالنسیاگا</b> با تکیه بر شاخص لوکس‌بودن حداکثری و استراتژی قیمت‌گذاری ممتاز، محصول را از کالایی مصرفی به یک «نماد جایگاه اجتماعی و فشن» ارتقا داده است.
+      </p>
+    </section>
+
+  </main>
+
+  <script>
+    // ساختار داده‌ها بر اساس مقادیر ورودی
+    const brands = [
+      { name: "Nike",       q: 4.35, p: 205,  l: 6,  note: "کیفیت بالا / قیمت متوسط", color: "#38bdf8" },
+      { name: "Air Jordan", q: 4.50, p: 230,  l: 7,  note: "بالاترین کیفیت / استایل خاص", color: "#f43f5e" },
+      { name: "Puma",       q: 4.30, p: 110,  l: 4,  note: "ارزش خرید عالی / اقتصادی", color: "#fbbf24" },
+      { name: "Balenciaga", q: 3.90, p: 1100, l: 10, note: "لوکس / قیمت بسیار بالا", color: "#a855f7" }
+    ];
+
+    // تزریق داده‌ها به جدول
     const tbody = document.getElementById("dataTable");
-    tbody.innerHTML = brands.map(b => 
+    tbody.innerHTML = brands.map(b => `
       <tr class="hover:bg-white/5 transition-colors">
         <td class="py-4 px-6 font-bold flex items-center gap-3">
           <span class="w-2.5 h-2.5 rounded-full" style="background:${b.color}; box-shadow: 0 0 8px ${b.color}"></span>
@@ -12,7 +102,7 @@
         <td class="py-4 px-6 text-center font-mono text-fuchsia-400">${b.l}/10</td>
         <td class="py-4 px-6 text-slate-400 text-xs">${b.note}</td>
       </tr>
-    ).join("");
+    `).join("");
 
     // پیکربندی و ساختار نمودار سه بعدی Plotly.js
     const trace = {
